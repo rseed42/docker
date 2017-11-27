@@ -1,0 +1,14 @@
+FROM debian:latest
+MAINTAINER Venelin Petkov venelin.petkov@man.eu
+
+ARG http_proxy
+ARG https_proxy
+
+# Proxy for apt-get
+RUN echo 'Acquire::http::Proxy "'$http_proxy'";' > /etc/apt/apt.conf.d/proxy
+RUN echo 'Acquire::https::Proxy "'$https_proxy'";' >> /etc/apt/apt.conf.d/proxy
+
+RUN apt-get update
+RUN apt-get install -y openjdk-8-jdk-headless
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/

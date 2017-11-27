@@ -1,0 +1,11 @@
+FROM alpine-java:1.8
+MAINTAINER Venelin Petkov venelin.petkov@man.eu
+
+RUN mkdir /opt
+COPY ./build/confluent/ /opt
+COPY ./docker-script/entrypoint-kafka.sh .
+
+EXPOSE 9092
+EXPOSE 9093
+
+ENTRYPOINT ["/entrypoint-kafka.sh"]
