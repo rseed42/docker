@@ -1,0 +1,209 @@
+version: "3"
+networks:
+  kafka:
+    external:
+      name: kafka
+services:
+#-------------------------------------------------------------------------------
+# Zookeeper 01
+#-------------------------------------------------------------------------------
+  zookeeper-01:
+    image: confluent-zookeeper:3.2.0
+    hostname: zookeeper-01
+    container_name: zookeeper-01
+    domainname: kafka
+    networks:
+       - kafka
+    volumes:
+      - /Users/g6714/Data/kafka/zookeeper-01:/var/zookeeper-01
+    environment:
+      - ZOOKEEPER_NAME=zookeeper-01
+      - ZOOKEEPER_SERVER_LIST=zookeeper-01 zookeeper-02 zookeeper-03
+      - ZOOKEEPER_ID=1
+
+#-------------------------------------------------------------------------------
+# Zookeeper 02
+#-------------------------------------------------------------------------------
+  zookeeper-02:
+    image: confluent-zookeeper:3.2.0
+    hostname: zookeeper-02
+    container_name: zookeeper-02
+    domainname: kafka
+    networks:
+       - kafka
+    volumes:
+      - /Users/g6714/Data/kafka/zookeeper-02:/var/zookeeper-02
+    environment:
+      - ZOOKEEPER_NAME=zookeeper-02
+      - ZOOKEEPER_SERVER_LIST=zookeeper-01 zookeeper-02 zookeeper-03
+      - ZOOKEEPER_ID=2
+
+#-------------------------------------------------------------------------------
+# Zookeeper 03
+#-------------------------------------------------------------------------------
+  zookeeper-03:
+    image: confluent-zookeeper:3.2.0
+    hostname: zookeeper-03
+    container_name: zookeeper-03
+    domainname: kafka
+    networks:
+       - kafka
+    volumes:
+      - /Users/g6714/Data/kafka/zookeeper-03:/var/zookeeper-03
+    environment:
+      - ZOOKEEPER_NAME=zookeeper-03
+      - ZOOKEEPER_SERVER_LIST=zookeeper-01 zookeeper-02 zookeeper-03
+      - ZOOKEEPER_ID=3
+
+#-------------------------------------------------------------------------------
+# Kafka 01
+#-------------------------------------------------------------------------------
+  kafka-01:
+    depends_on:
+      - zookeeper-01
+      - zookeeper-02
+      - zookeeper-03
+    image: confluent-kafka:3.2.0
+    hostname: kafka-01
+    container_name: kafka-01
+    domainname: kafka
+    networks:
+      - kafka
+    volumes:
+      - /Users/g6714/Data/kafka/kafka-logs-01:/var/kafka-01
+    environment:
+      - ZOOKEEPER_URL=zookeeper-01:2181,zookeeper-02:2181,zookeeper-03:2181
+      - KAFKA_SERVER_NAME=kafka-01
+      - KAFKA_BROKER_ID=0
+
+#-------------------------------------------------------------------------------
+# Kafka 02
+#-------------------------------------------------------------------------------
+  kafka-02:
+    depends_on:
+      - zookeeper-01
+      - zookeeper-02
+      - zookeeper-03
+    image: confluent-kafka:3.2.0
+    hostname: kafka-02
+    container_name: kafka-02
+    domainname: kafka
+    networks:
+      - kafka
+    volumes:
+      - /Users/g6714/Data/kafka/kafka-logs-02:/var/kafka-02
+    environment:
+      - ZOOKEEPER_URL=zookeeper-01:2181,zookeeper-02:2181,zookeeper-03:2181
+      - KAFKA_SERVER_NAME=kafka-02
+      - KAFKA_BROKER_ID=1
+
+#-------------------------------------------------------------------------------
+# Kafka 03
+#-------------------------------------------------------------------------------
+  kafka-03:
+    depends_on:
+      - zookeeper-01
+      - zookeeper-02
+      - zookeeper-03
+    image: confluent-kafka:3.2.0
+    hostname: kafka-03
+    container_name: kafka-03
+    domainname: kafka
+    networks:
+      - kafka
+    volumes:
+      - /Users/g6714/Data/kafka/kafka-logs-03:/var/kafka-03
+    environment:
+      - ZOOKEEPER_URL=zookeeper-01:2181,zookeeper-02:2181,zookeeper-03:2181
+      - KAFKA_SERVER_NAME=kafka-03
+      - KAFKA_BROKER_ID=2
+
+#-------------------------------------------------------------------------------
+# Producer
+#-------------------------------------------------------------------------------
+  producer:
+    image: kafka-producer:0.1
+    hostname: producer
+    container_name: producer
+    domainname: kafka
+    networks:
+      - kafka
+    volumes:
+      - /Users/g6714/Projects/rio-bigdata/man-filter:/home
+    environment:
+      - ZOOKEEPER_URL=zookeeper-01:2181,zookeeper-02:2181,zookeeper-03:2181
+      - CONFLUENT_HOME=/opt
+    command: tail -f /dev/null
+
+#-------------------------------------------------------------------------------
+# Vehicle
+#-------------------------------------------------------------------------------
+  vehicle:
+    image: kafka-producer:0.1
+    hostname: vehicle
+    container_name: vehicle
+    domainname: kafka
+    networks:
+      - kafka
+    volumes:
+      - /Users/g6714/Projects/rio-bigdata/man-filter:/home
+    environment:
+      - ZOOKEEPER_URL=zookeeper-01:2181,zookeeper-02:2181,zookeeper-03:2181
+      - CONFLUENT_HOME=/opt
+    command: tail -f /dev/null
+
+#-------------------------------------------------------------------------------
+# Consumer
+#-------------------------------------------------------------------------------
+  consumer:
+    image: kafka-producer:0.1
+    hostname: consumer
+    container_name: consumer
+    domainname: kafka
+    networks:
+      - kafka
+    volumes:
+      - /Users/g6714/Projects/rio-bigdata/man-filter:/home
+    environment:
+      - ZOOKEEPER_URL=zookeeper-01:2181,zookeeper-02:2181,zookeeper-03:2181
+      - CONFLUENT_HOME=/opt
+    command: tail -f /dev/null
+
+#-------------------------------------------------------------------------------
+# Filter
+#-------------------------------------------------------------------------------
+  filter:
+    # RocksDB apparently depends on some version of glibc, which is not
+    # available in Alpine
+    image: debian-java:1.8
+    hostname: filter
+    container_name: filter
+    domainname: kafka
+    networks:
+      - kafka
+    volumes:
+      - /Users/g6714/Projects/rio-bigdata/man-filter:/home
+#      - /Users/g6714/Projects/:/home
+    environment:
+      - ZOOKEEPER_URL=zookeeper-01:2181,zookeeper-02:2181,zookeeper-03:2181
+      - CONFLUENT_HOME=/opt
+    command: tail -f /dev/null
+
+#-------------------------------------------------------------------------------
+# Filter2
+#-------------------------------------------------------------------------------
+  filter2:
+    # RocksDB apparently depends on some version of glibc, which is not
+    # available in Alpine
+    image: debian-java:1.8
+    hostname: filter2
+    container_name: filter2
+    domainname: kafka
+    networks:
+      - kafka
+    volumes:
+      - /Users/g6714/Projects/rio-bigdata/man-filter:/home
+    environment:
+      - ZOOKEEPER_URL=zookeeper-01:2181,zookeeper-02:2181,zookeeper-03:2181
+      - CONFLUENT_HOME=/opt
+    command: tail -f /dev/null
