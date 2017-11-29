@@ -9,5 +9,6 @@ Kafka keep their data. This means that data is not lost on restart.
 
 ## How to run
 
-1. Edit the KAFKA_STORE_DIR in file ".env" in this directory. This should point to a directory on the computer where docker runs. The directories will be automatically created on startup.
-2. Start with "docker-compose up"
+1. Create the network "kafka" by issuing "docker network create kafka" if this network is not already present.
+2. Edit the KAFKA_STORE_DIR in file ".env" in this directory. This should point to a directory on the computer where docker runs. The directories will be automatically created on startup.
+3. Start with "docker-compose up"
